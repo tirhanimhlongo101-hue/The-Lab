@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build your creator website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#181512; --ink-2:#211D18; --paper:#F8F4EC;
+    --gold:#FFC93C; --line:rgba(248,244,236,0.14); --dim:rgba(248,244,236,0.6);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--ink); color:var(--paper); font-family:'IBM Plex Sans', sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:22px 24px; max-width:640px; margin:0 auto;}
+  .link-btn{background:none; border:none; color:var(--dim); font-size:14px; cursor:pointer; font-family:'IBM Plex Sans',sans-serif;}
+  .progress{flex:1; height:4px; background:var(--line); border-radius:4px; margin:0 20px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold); width:14.2%; transition:width .3s ease;}
+
+  .step{display:none; max-width:600px; margin:0 auto; padding:20px 24px 60px; text-align:center;}
+  .step.active{display:block;}
+  h1{font-family:'Fraunces', serif; font-weight:800; font-size:clamp(26px,4.5vw,36px); line-height:1.1; margin-bottom:12px;}
+  .step-sub{color:var(--dim); font-size:15.5px; margin-bottom:36px;}
+
+  .option{
+    display:flex; align-items:center; gap:16px; text-align:left;
+    border:1px solid var(--line); border-radius:14px; padding:18px 20px;
+    margin-bottom:12px; cursor:pointer; background:var(--ink-2); transition:border-color .2s;
+  }
+  .option.selected{border-color:var(--gold);}
+  .option .swatch{width:46px; height:46px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:20px;}
+  .option b{display:block; font-family:'Fraunces',serif; font-size:16px; margin-bottom:3px;}
+  .option span{font-size:13px; color:var(--dim);}
+
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:8px;}
+  .chip{border:1px solid var(--line); border-radius:12px; padding:16px 8px; cursor:pointer; background:var(--ink-2); font-size:13px; transition:border-color .2s;}
+  .chip.selected{border-color:var(--gold); background:rgba(255,201,60,0.08);}
+
+  .field{width:100%; background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:14px 16px; color:var(--paper); font-size:15px; margin-bottom:14px; outline:none; text-align:left;}
+  .field::placeholder{color:var(--dim);}
+  .field:focus{border-color:var(--gold);}
+  textarea.field{resize:none; height:110px;}
+
+  .domain-field{display:flex; align-items:center; background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:5px 5px 5px 16px; margin-bottom:14px;}
+  .domain-field .prefix{color:var(--dim); font-size:14px; white-space:nowrap;}
+  .domain-field input{border:none; outline:none; background:transparent; font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--paper); padding:10px 8px; flex:1; min-width:0;}
+
+  .btn{width:100%; padding:15px; border-radius:10px; font-size:15px; font-weight:700; border:none; cursor:pointer; background:var(--line); color:var(--dim); transition:background .2s, color .2s;}
+  .btn.ready{background:#FFFFFF; color:var(--ink); cursor:pointer;}
+
+  .fine{font-size:12px; color:var(--dim); margin-top:16px;}
+  .fine a{color:var(--paper);}
+
+  .gen-status{padding:60px 24px; text-align:center;}
+  .spinner{width:36px; height:36px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--gold); margin:0 auto 22px; animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .gen-status p{color:var(--dim); font-size:14px; margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="link-btn" id="backBtn" onclick="prevStep()">Back</button>
+  <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  <button class="link-btn" onclick="window.location.href='landing.html'">Skip</button>
+</div>
+
+<!-- STEP 1: Goal -->
+<div class="step active" data-step="1">
+  <h1>What are you here to do?</h1>
+  <p class="step-sub">This shapes what your website leads with.</p>
+
+  <div class="option" onclick="selectOption(this,'goal')">
+    <div class="swatch" style="background:#0F6E66;">🌱</div>
+    <div><b>Grow as a creator</b><span>Build a site that proves your work and lands better deals.</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'goal')">
+    <div class="swatch" style="background:#9C1E63;">🤝</div>
+    <div><b>Manage brand partnerships</b><span>Track deals, catch bad terms, keep everything organized.</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'goal')">
+    <div class="swatch" style="background:#E9B94A;">🔎</div>
+    <div><b>Find creators for my brand</b><span>Browse verified creators and their real deal history.</span></div>
+  </div>
+
+  <button class="btn" id="continue1" onclick="nextStep()" disabled>Continue</button>
+</div>
+
+<!-- STEP 2: Niche -->
+<div class="step" data-step="2">
+  <h1>What's your content about?</h1>
+  <p class="step-sub">This decides your site's structure, tone and color palette — you can change all of it later.</p>
+
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="Fashion & Beauty">
+    <div class="swatch" style="background:linear-gradient(135deg,#9C1E63,#E9B94A);">💄</div>
+    <div><b>Fashion & Beauty</b><span>Style, skincare, product edits</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="Travel & Lifestyle">
+    <div class="swatch" style="background:linear-gradient(135deg,#6B4A2F,#C9A876);">🌍</div>
+    <div><b>Travel & Lifestyle</b><span>Guides, journeys, everyday life</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="Fitness & Health">
+    <div class="swatch" style="background:linear-gradient(135deg,#181512,#3FA679);">💪</div>
+    <div><b>Fitness & Health</b><span>Training, programs, gear</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="Food & Cooking">
+    <div class="swatch" style="background:linear-gradient(135deg,#B5502E,#E9B94A);">🍳</div>
+    <div><b>Food & Cooking</b><span>Recipes, reviews, kitchen picks</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="Tech & Business">
+    <div class="swatch" style="background:linear-gradient(135deg,#1B2A4A,#3F6FA6);">💻</div>
+    <div><b>Tech & Business</b><span>Reviews, tools, entrepreneurship</span></div>
+  </div>
+  <div class="option" onclick="selectOption(this,'niche')" data-niche="General / Other">
+    <div class="swatch" style="background:linear-gradient(135deg,#3A342A,#6B6459);">✨</div>
+    <div><b>General / Other</b><span>A bit of everything</span></div>
+  </div>
+
+  <button class="btn" id="continue2" onclick="nextStep()" style="margin-top:8px;" disabled>Continue</button>
+</div>
+
+<!-- STEP 3: Platforms -->
+<div class="step" data-step="3">
+  <h1>Where do you create?</h1>
+  <p class="step-sub">Pick everywhere you post — you can add more later.</p>
+
+  <div class="grid3">
+    <div class="chip" onclick="toggleChip(this)">Instagram</div>
+    <div class="chip" onclick="toggleChip(this)">TikTok</div>
+    <div class="chip" onclick="toggleChip(this)">YouTube</div>
+    <div class="chip" onclick="toggleChip(this)">X</div>
+    <div class="chip" onclick="toggleChip(this)">Threads</div>
+    <div class="chip" onclick="toggleChip(this)">Podcast</div>
+    <div class="chip" onclick="toggleChip(this)">Blog</div>
+    <div class="chip" onclick="toggleChip(this)">Twitch</div>
+    <div class="chip" onclick="toggleChip(this)">Pinterest</div>
+  </div>
+
+  <button class="btn ready" style="margin-top:22px;" onclick="nextStep()">Continue</button>
+</div>
+
+<!-- STEP 4: Describe content -->
+<div class="step" data-step="4">
+  <h1>Tell us about your content</h1>
+  <p class="step-sub">A couple of sentences is enough — this is what your site's copy and structure get built from.</p>
+
+  <textarea class="field" id="descriptionField" placeholder="e.g. I make honest skincare and beauty reviews, mostly Get Ready With Me videos and product breakdowns. My style is clean, warm, a little luxe."></textarea>
+
+  <button class="btn ready" onclick="nextStep()">Continue</button>
+</div>
+
+<!-- STEP 5: Profile details -->
+<div class="step" data-step="5">
+  <h1>Add your details</h1>
+  <p class="step-sub">This shows up at the top of your site.</p>
+
+  <input type="text" class="field" id="nameField" placeholder="Display name">
+  <textarea class="field" id="bioField" placeholder="Short bio — what you create, who you work with" style="height:90px;"></textarea>
+
+  <button class="btn ready" onclick="nextStep()">Continue</button>
+</div>
+
+<!-- STEP 6: Claim link + generate -->
+<div class="step" data-step="6">
+  <h1>Claim your link</h1>
+  <p class="step-sub">This is your website, your media kit, and your deal tracker — all in one place.</p>
+
+  <div class="domain-field">
+    <span class="prefix mono">thelab.me/</span>
+    <input type="text" class="field" style="border:none; padding:10px 4px; margin:0;" placeholder="yourname" id="usernameField" oninput="checkUsername()">
+  </div>
+
+  <button class="btn" id="finishBtn" onclick="finish()" disabled>Generate my website</button>
+  <p class="fine">By continuing, you agree to The Lab's <a href="#">Privacy Notice</a> and <a href="#">Terms</a>.</p>
+</div>
+
+<!-- STEP 7: Generating -->
+<div class="step" data-step="7">
+  <div class="gen-status">
+    <div class="spinner"></div>
+    <h1 style="font-size:22px;">Building your website…</h1>
+    <p id="genStatusText">Reading what you told us about your content.</p>
+  </div>
+</div>
+
+<script>
+  const totalSteps = 6;
+  let current = 1;
+  const data = { goal: '', niche: '', platforms: [], description: '', displayName: '', bio: '', username: '' };
+
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('email') || ('demo+' + Date.now() + '@thelab.me');
+
+  function updateProgress(){
+    document.getElementById('progressFill').style.width = (current/totalSteps*100) + '%';
+    document.getElementById('backBtn').style.visibility = current === 1 ? 'hidden' : 'visible';
+  }
+  function nextStep(){
+    if(current >= totalSteps) return;
+    document.querySelector(`.step[data-step="${current}"]`).classList.remove('active');
+    current++;
+    document.querySelector(`.step[data-step="${current}"]`).classList.add('active');
+    updateProgress();
+  }
+  function prevStep(){
+    if(current <= 1) return;
+    document.querySelector(`.step[data-step="${current}"]`).classList.remove('active');
+    current--;
+    document.querySelector(`.step[data-step="${current}"]`).classList.add('active');
+    updateProgress();
+  }
+
+  function selectOption(el, group){
+    el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    if(group === 'goal'){
+      data.goal = el.querySelector('b').textContent;
+      document.getElementById('continue1').disabled = false;
+      document.getElementById('continue1').classList.add('ready');
+    }
+    if(group === 'niche'){
+      data.niche = el.dataset.niche;
+      document.getElementById('continue2').disabled = false;
+      document.getElementById('continue2').classList.add('ready');
+    }
+  }
+
+  function toggleChip(el){
+    el.classList.toggle('selected');
+    data.platforms = [...document.querySelectorAll('.chip.selected')].map(c => c.textContent);
+  }
+
+  function checkUsername(){
+    const val = document.getElementById('usernameField').value.trim();
+    const btn = document.getElementById('finishBtn');
+    if(val.length >= 3){ btn.disabled = false; btn.classList.add('ready'); }
+    else { btn.disabled = true; btn.classList.remove('ready'); }
+  }
+
+  // ---------- Website generation ----------
+
+  const NICHE_PRESETS = {
+    'Fashion & Beauty': {
+      theme: { mode:'dark', bg:'#1A1416', bg2:'#241C1F', ink:'#F7EFE9', accent:'#E4A6C4', font:'serif' },
+      eyebrow: 'Beauty & Style Creator',
+      headline: 'Beauty,\ntested honestly.',
+      subtitle: 'Real routines, real reviews — no filters on the parts that matter.',
+      storyHeading: 'My Routine', shopHeading: 'Products I Love', featuredHeading: 'The Beauty Edit',
+    },
+    'Travel & Lifestyle': {
+      theme: { mode:'dark', bg:'#1B1712', bg2:'#241E17', ink:'#F8F4EC', accent:'#E9B94A', font:'serif' },
+      eyebrow: 'Travel & Lifestyle Creator',
+      headline: 'See the world,\ndifferently.',
+      subtitle: 'Guides, journeys, and the everyday moments in between.',
+      storyHeading: 'My Journeys', shopHeading: 'Travel Essentials', featuredHeading: 'Travel Guides',
+    },
+    'Fitness & Health': {
+      theme: { mode:'dark', bg:'#121412', bg2:'#1C201C', ink:'#F1F5F1', accent:'#3FA679', font:'sans' },
+      eyebrow: 'Fitness & Health Creator',
+      headline: 'Build a\nstronger you.',
+      subtitle: 'Training, programs, and the mindset behind the work.',
+      storyHeading: 'My Story', shopHeading: 'My Gear', featuredHeading: 'Programs',
+    },
+    'Food & Cooking': {
+      theme: { mode:'dark', bg:'#1C1410', bg2:'#261B14', ink:'#FBF3E9', accent:'#E9873C', font:'serif' },
+      eyebrow: 'Food Creator',
+      headline: 'Cooked with\nintention.',
+      subtitle: 'Recipes, kitchen picks, and honest reviews of what\u2019s worth making.',
+      storyHeading: 'How I Cook', shopHeading: 'Kitchen Picks', featuredHeading: 'Recipes',
+    },
+    'Tech & Business': {
+      theme: { mode:'dark', bg:'#12141A', bg2:'#1A1E28', ink:'#EDF0F7', accent:'#5B8DEF', font:'sans' },
+      eyebrow: 'Creator & Entrepreneur',
+      headline: 'Building in\npublic.',
+      subtitle: 'Tools, reviews, and lessons from building a creative business.',
+      storyHeading: 'My Story', shopHeading: 'Tools I Use', featuredHeading: 'Featured Work',
+    },
+    'General / Other': {
+      theme: { mode:'dark', bg:'#181512', bg2:'#211D18', ink:'#F8F4EC', accent:'#FFC93C', font:'serif' },
+      eyebrow: 'Content Creator',
+      headline: 'Storytelling.\nBranding.\nBuilding impact.',
+      subtitle: 'I create content that connects brands to culture and turns ideas into influence.',
+      storyHeading: 'My Story', shopHeading: 'My Picks', featuredHeading: 'Featured Work',
+    },
+  };
+
+  function heuristicWebsite(){
+    const preset = NICHE_PRESETS[data.niche] || NICHE_PRESETS['General / Other'];
+    const name = data.displayName || 'Your name';
+    const sections = [
+      { id:'s1', type:'hero', visible:true, eyebrow: preset.eyebrow, headline: preset.headline, subtitle: preset.subtitle, image:'' },
+      { id:'s2', type:'stats', visible:true, heading:'' },
+      { id:'s3', type:'story', visible:true, heading: preset.storyHeading, body: data.description || `${name} is a ${data.niche.toLowerCase()} creator building an honest, story-driven presence online.` },
+      { id:'s4', type:'partnerships', visible:true, heading:'Brand Partnerships' },
+      { id:'s5', type:'featured', visible:true, heading: preset.featuredHeading },
+      { id:'s6', type:'shop', visible: (data.niche !== 'Fitness & Health'), heading: preset.shopHeading },
+      { id:'s7', type:'about', visible:true, heading:'About', body: data.bio || '' },
+      { id:'s8', type:'contact', visible:true, heading:'Work With Me', body: 'I partner with a small number of brands I genuinely use and trust. If that sounds like you, reach out below.' },
+    ];
+    return { theme: preset.theme, sections };
+  }
+
+  async function tryAIWebsite(){
+    const prompt = `You are generating the JSON configuration for a content creator's personal website builder. Return ONLY raw JSON, no markdown, no commentary.
+
+Creator info:
+- Name: ${data.displayName}
+- Niche: ${data.niche}
+- Platforms: ${data.platforms.join(', ')}
+- Goal: ${data.goal}
+- Bio: ${data.bio}
+- Content description (in their own words): ${data.description}
+
+Return JSON matching exactly this shape:
+{
+  "theme": { "mode": "dark" or "light", "bg": "#hex", "bg2": "#hex", "ink": "#hex", "accent": "#hex", "font": "serif" or "sans" },
+  "sections": [
+    { "id": "s1", "type": "hero", "visible": true, "eyebrow": "string", "headline": "string with \\n between lines", "subtitle": "string", "image": "" },
+    { "id": "s2", "type": "stats", "visible": true, "heading": "" },
+    { "id": "s3", "type": "story", "visible": true, "heading": "string", "body": "1-2 short paragraphs in first person" },
+    { "id": "s4", "type": "partnerships", "visible": true, "heading": "string" },
+    { "id": "s5", "type": "featured", "visible": true, "heading": "string" },
+    { "id": "s6", "type": "shop", "visible": true or false, "heading": "string" },
+    { "id": "s7", "type": "about", "visible": true, "heading": "About", "body": "string" },
+    { "id": "s8", "type": "contact", "visible": true, "heading": "string", "body": "string" }
+  ]
+}
+
+Rules:
+- Pick colors that genuinely fit the niche and described content — don't default to generic browns/golds unless that actually fits. Feel free to use a light/paper background if that suits the creator better than a dark one.
+- theme.mode must match the actual colors: "light" mode needs a pale bg with dark ink, "dark" mode needs a dark bg with pale ink. Never produce low-contrast text (e.g. white text on a white or pale background).
+- Only set "shop" visible:true if the creator's description implies they'd plausibly recommend or sell products.
+- Section order and headings should feel intentional for this specific creator, not a generic template.
+- Hero headline should be punchy, 2-4 lines, reflecting their actual voice from the description.
+- Keep all text short — this is a website, not an essay.`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    try{
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1500,
+          messages: [{ role: 'user', content: prompt }],
+        })
+      });
+      clearTimeout(timeout);
+      const json = await response.json();
+      const text = (json.content || []).map(b => b.text || '').join('');
+      const clean = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      if(parsed && parsed.theme && Array.isArray(parsed.sections)) return parsed;
+      return null;
+    } catch(e){
+      clearTimeout(timeout);
+      console.warn('AI website generation failed, using preset instead:', e);
+      return null;
+    }
+  }
+
+  async function finish(){
+    data.username = document.getElementById('usernameField').value.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
+    if(!data.username){ alert('Pick a username first.'); return; }
+
+    // pull step 4/5 fields (in case user navigated back and forth)
+    data.description = document.getElementById('descriptionField').value.trim();
+    data.displayName = document.getElementById('nameField').value.trim();
+    data.bio = document.getElementById('bioField').value.trim();
+
+    document.querySelector(`.step[data-step="${current}"]`).classList.remove('active');
+    current = 7;
+    document.querySelector(`.step[data-step="7"]`).classList.add('active');
+    updateProgress();
+
+    const statusEl = document.getElementById('genStatusText');
+
+    // Check username isn't already taken
+    try{
+      const existing = await window.storage.get('thelab:users:' + data.username, false);
+      if(existing){
+        const existingProfile = JSON.parse(existing.value);
+        if(existingProfile.email !== email){
+          alert('That username is already taken — try another one.');
+          current = 6;
+          document.querySelector(`.step[data-step="7"]`).classList.remove('active');
+          document.querySelector(`.step[data-step="6"]`).classList.add('active');
+          updateProgress();
+          return;
+        }
+      }
+    } catch(e){ /* not found = available */ }
+
+    statusEl.textContent = 'Matching a layout and palette to your niche…';
+    let website = await tryAIWebsite();
+    if(!website){
+      statusEl.textContent = 'Using a curated starting point for ' + data.niche + '…';
+      website = heuristicWebsite();
+    }
+
+    statusEl.textContent = 'Saving your site…';
+
+    const profile = {
+      email, username: data.username, displayName: data.displayName, bio: data.bio,
+      goal: data.goal, niche: data.niche, platforms: data.platforms,
+      createdAt: new Date().toISOString(),
+      stats: { followers: '', views: '', years: '' },
+      featuredWork: [], shopPicks: [], manualPartnerships: [],
+      social: { instagram:'', tiktok:'', youtube:'', twitter:'', email },
+      mediaKit: { intro: data.bio, services: [] },
+      website,
+    };
+
+    try{
+      await window.storage.set('thelab:users:' + email, JSON.stringify(profile), false);
+      await window.storage.set('thelab:users:' + data.username, JSON.stringify(profile), false);
+      await window.storage.set('thelab:session', email, false);
+    } catch(e){
+      console.error(e);
+      alert('Something went wrong saving your site — try again.');
+      current = 6;
+      document.querySelector(`.step[data-step="7"]`).classList.remove('active');
+      document.querySelector(`.step[data-step="6"]`).classList.add('active');
+      updateProgress();
+      return;
+    }
+
+    window.location.href = 'dashboard.html';
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
